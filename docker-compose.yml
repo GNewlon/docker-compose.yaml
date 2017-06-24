@@ -1,0 +1,176 @@
+version: '2'
+services:
+  plex:
+    image: "plexinc/pms-docker:plexpass"
+    container_name: Plex
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles
+    network_mode: "host"  
+    volumes:
+     - /mnt/user/TV:/TV    
+     - /ramdisk:/transcode
+     - /mnt/user/Movies:/Movies
+     - /mnt/cache/appdata/plex:/plex
+     - /mnt/user/Misc Media:/Misc Media
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/plex/config:/config
+     - /mnt/disks/QNAP_Movies/My Movies/DVR:/DVR
+     - /mnt/disks/QNAP_Movies/My Movies/HD TV Series:/HD_TV
+     - /mnt/disks/QNAP_Movies/My Movies/HD Movies:/HD Movies
+     - /mnt/disks/QNAP_Movies/My Movies/Other TV Series:/Other TV
+     - /mnt/disks/QNAP_Movies/My Movies/Instructional:/Instructional
+     - /mnt/disks/QNAP_Movies/My Movies/Extreme Sports:/Extreme Sports
+     - /mnt/disks/QNAP_Movies/My Movies/Training Videos:/Training Videos
+    restart: always
+  nzbget:
+    image: "linuxserver/nzbget:latest"
+    container_name: NZBget
+    volumes:
+     - /usr/bin/tar:/tar
+     - /usr/bin/7za:/7za
+     - /usr/bin/unrar:/unrar
+     - /usr/bin/python2.7:/python2
+     - /mnt/cache/appdata/NZBget:/NZBget    
+     - /mnt/cache/appdata/NZBget/nzb:/nzb
+     - /mnt/cache/appdata/NZBget/tmp:/tmp
+     - /mnt/user/downloads/NZBget:/downloads
+     - /mnt/cache/appdata/NZBget/queue:/queue
+     - /mnt/cache/appdata/NZBget/config:/config 
+     - /mnt/cache/appdata/NZBget/scripts:/scripts
+     - /mnt/user/downloads/NZBget/complete:/complete
+     - /mnt/user/downloads/NZBget/incomplete:/incomplete
+    ports:
+     - "6789:6789"
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles
+    links:
+     - sonarr:sonarr
+     - radarr:radarr
+    restart: always
+  sonarr:
+    image: "linuxserver/sonarr:latest"
+    container_name: Sonarr
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles
+    ports:
+     - "8989:8989"
+    volumes:
+     - /mnt/user/TV:/TV
+     - /dev/rtc:/dev/rtc:ro
+     - /mnt/user/Misc Media:/Misc Media   
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/sonarr/config:/config
+     - /mnt/user/downloads/NZBget/Sonarr:/sonarr
+     - /mnt/disks/QNAP_Movies/My Movies/DVR:/DVR
+     - /mnt/disks/QNAP_Movies/My Movies/DVR:/QNAP DVR
+     - /mnt/disks/QNAP_Movies/My Movies/HD TV Series:/HD TV
+     - /mnt/cache/downloads/NZBget/complete/Sonarr:/downloads
+     - /mnt/disks/QNAP_Movies/My Movies/HD TV Series:/QNAP TV
+     - /mnt/disks/QNAP_Movies/My Movies/Other TV Series:/Other TV
+     - /mnt/disks/QNAP_Movies/My Movies/Other TV Series:/QNAP Other TV
+    restart: always
+  radarr:
+    image: "linuxserver/radarr:latest"
+    container_name: Radarr
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles
+    ports:
+     - "7878:7878"
+    volumes:
+     - /dev/rtc:/dev/rtc:ro
+     - /mnt/user/Movies:/Movies
+     - /mnt/user/Misc Media:/Misc Media 
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/radarr/config:/config
+     - /mnt/user/downloads/NZBget/Radarr:/radarr
+     - /mnt/disks/QNAP_Movies/My Movies/HD Movies:/HD Movies
+     - /mnt/cache/downloads/NZBget/complete/Sonarr:/downloads
+     - /mnt/disks/QNAP_Movies/My Movies/HD Movies:/QNAP Movies
+    restart: always
+  plexpy:
+    image: "linuxserver/plexpy:latest"
+    container_name: Plexpy
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles 
+    ports:
+     - "8189:8189"
+    volumes:
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/plexpy:/pleypy
+     - /mnt/cache/appdata/plexpy/logs:/logs
+     - /mnt/cache/appdata/plexpy/config:/config
+     - /mnt/cache/appdata/plexpy/config/cache:/cache
+    restart: always
+  plexrequests:
+    image: "linuxserver/plexrequests:latest"
+    container_name: PlexRequests
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles 
+    ports:
+     - "3131:3131"
+    volumes:
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/plexrequests/config:/config
+     - /mnt/cache/appdata/plexrequests/data:/downloads
+    restart: always
+  muximux:
+    image: "linuxserver/muximux:latest"
+    container_name: Muximux
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles 
+    ports:
+     - "7080:7080"
+    volumes:
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/Muximux/config:/config
+     - /mnt/cache/appdata/Muximux/data:/downloads     
+    restart: always
+  hydra:
+    image: "linuxserver/hydra:latest"
+    container_name: Hydra
+    environment:
+     - PUID=1000
+     - PGID=100
+     - TZ=America/Los_Angeles
+    ports:
+     - "5075:5075"
+    volumes:
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/hydra/config:/config
+    restart: always
+  krusader:
+    image: "sparklyballs/krusader:latest"
+    container_name: Krusader
+    environment:
+     - PUID=1000
+     - PGID=100
+     - HEIGHT=720
+     - WIDTH=1420
+     - TZ=America/Los_Angeles
+    network_mode: "bridge"
+    ports:
+     - "8080:8080"
+    volumes:
+     - /boot:/usb
+     - /mnt:/UNRAID
+     - /mnt/QNAP:/QNAP
+     - /mnt/user:/disks
+     - /mnt:/unassigned
+     - /mnt/user/Movies:/Movies
+     - /etc/localtime:/etc/localtime:ro
+     - /mnt/cache/appdata/krusader:/nobody/.kde
+    restart: always
